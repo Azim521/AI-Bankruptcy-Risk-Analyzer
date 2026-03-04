@@ -14,7 +14,7 @@ based on financial ratios using a trained XGBoost model.
 """
 )
 
-model = joblib.load("model/bankruptcy_model.pkl")
+model = joblib.load("model/bankruptcy_xgb_model.pkl")
 features = joblib.load("model/bankruptcy_features.pkl")
 
 st.sidebar.header("Input Financial Ratios")
