@@ -68,7 +68,8 @@ if st.button("Analyze Bankruptcy Risk"):
     with col2:
         st.metric("Risk Score (0–100)", f"{score:.2f}")
 
-    st.progress(score/100)
+    progress_value = min(max(float(prob), 0.0), 1.0)
+    st.progress(progress_value)
 
     st.markdown(f"### Risk Category: :{color}[{category}]")
 
