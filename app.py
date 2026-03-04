@@ -2,27 +2,45 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import joblib
+import os
 
 st.set_page_config(page_title="AI Bankruptcy Risk Analyzer", layout="wide")
 
 st.title("AI Corporate Bankruptcy Risk Analyzer")
 
-st.write(
-"""
-This system predicts the probability that a company will go bankrupt
+st.write("""
+This AI system predicts the probability that a company will go bankrupt
 based on financial ratios using a trained XGBoost model.
-"""
-)
+""")
 
-model = joblib.load("model/bankruptcy_xgb_model.pkl")
-features = joblib.load("model/bankruptcy_features.pkl")
+# Load model
+model_path = os.path.join("model", "bankruptcy_xgb_model.pkl")
+features_path = os.path.join("model", "bankruptcy_features.pkl")
 
-st.sidebar.header("Input Financial Ratios")
+model = joblib.load(model_path)
+features = joblib.load(features_path)
 
+# Top features for user input
+top_features = [
+    'Attr24','Attr27','Attr13','Attr26','Attr23',
+    'Attr14','Attr34','Attr22','Attr16','Attr21'
+]
+
+st.sidebar.header("Input Key Financial Ratios")
+
+user_inputs = {}
+
+for feature in top_features:
+    user_inputs[feature] = st.sidebar.number_input(feature, value=0.0)
+
+# Create full feature set
 input_data = {}
 
 for feature in features:
-    input_data[feature] = st.sidebar.number_input(feature, value=0.0)
+    if feature in user_inputs:
+        input_data[feature] = user_inputs[feature]
+    else:
+        input_data[feature] = 0
 
 input_df = pd.DataFrame([input_data])
 
@@ -43,3 +61,13 @@ if st.button("Analyze Bankruptcy Risk"):
     st.write(f"Bankruptcy Probability: **{prob:.2f}**")
     st.write(f"Risk Score (0–100): **{score:.2f}**")
     st.write(f"Risk Category: **{category}**")
+
+    st.write("---")
+    st.write("### Model Information")
+
+    st.write("""
+    Model: XGBoost  
+    Dataset: Polish Companies Bankruptcy Dataset  
+    Features: 64 Financial Ratios  
+    Validation: Multi-year forecasting (1–5 years before bankruptcy)
+    """)
