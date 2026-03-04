@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-import numpy as np
 import joblib
 import os
 
@@ -20,7 +19,7 @@ features_path = os.path.join("model", "bankruptcy_features.pkl")
 model = joblib.load(model_path)
 features = joblib.load(features_path)
 
-# Top features for user input
+# Top financial features
 top_features = [
     'Attr24','Attr27','Attr13','Attr26','Attr23',
     'Attr14','Attr34','Attr22','Attr16','Attr21'
@@ -33,7 +32,7 @@ user_inputs = {}
 for feature in top_features:
     user_inputs[feature] = st.sidebar.number_input(feature, value=0.0)
 
-# Create full feature set
+# Build full feature vector
 input_data = {}
 
 for feature in features:
@@ -51,23 +50,38 @@ if st.button("Analyze Bankruptcy Risk"):
 
     if score < 30:
         category = "Low Risk"
+        color = "green"
     elif score < 60:
         category = "Medium Risk"
+        color = "orange"
     else:
         category = "High Risk"
+        color = "red"
 
-    st.subheader("Prediction Result")
+    st.subheader("Prediction Results")
 
-    st.write(f"Bankruptcy Probability: **{prob:.2f}**")
-    st.write(f"Risk Score (0–100): **{score:.2f}**")
-    st.write(f"Risk Category: **{category}**")
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.metric("Bankruptcy Probability", f"{prob:.2f}")
+
+    with col2:
+        st.metric("Risk Score (0–100)", f"{score:.2f}")
+
+    st.progress(score/100)
+
+    st.markdown(f"### Risk Category: :{color}[{category}]")
 
     st.write("---")
+
     st.write("### Model Information")
 
     st.write("""
-    Model: XGBoost  
-    Dataset: Polish Companies Bankruptcy Dataset  
-    Features: 64 Financial Ratios  
-    Validation: Multi-year forecasting (1–5 years before bankruptcy)
-    """)
+Model: **XGBoost**
+
+Dataset: **Polish Companies Bankruptcy Dataset**
+
+Features: **64 Financial Ratios**
+
+Validation: **Multi-year forecasting (1–5 years before bankruptcy)**
+""")
