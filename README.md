@@ -16,8 +16,8 @@ The project demonstrates how machine learning can detect **financial distress si
 
 ## Live Application
 
-🔗 **Try the live app here:**  
-[(Streamlit App)](https://ai-bankruptcy-risk-analyzer-azim.streamlit.app/)
+🔗 **Try the live app here:**
+[Streamlit App](https://ai-bankruptcy-risk-analyzer-azim.streamlit.app/)
 
 ---
 
@@ -28,11 +28,8 @@ Corporate bankruptcy prediction is an important task in **financial risk managem
 Financial institutions, investors, and regulators use predictive models to identify companies at risk of failure.
 
 Early detection of financial distress helps organizations:
-
 - reduce credit risk
-
 - avoid bad investments
-
 - manage financial exposure
 
 This project builds an **AI system capable of predicting bankruptcy risk using financial ratios.**
@@ -41,166 +38,174 @@ This project builds an **AI system capable of predicting bankruptcy risk using f
 
 ## Dataset
 
-Dataset used:
-
 **Polish Companies Bankruptcy Dataset**
 
-Source: UCI Machine Learning Repository / Kaggle
-
-Dataset characteristics:
+Source: UCI Machine Learning Repository
 
 | Property | Value |
-|--------|----------|
-| Companies | 7027 |
-| Features | 64 Financial Ratios |
-| XGBoost | Bankruptcy (0/1) |
+|---|---|
+| Companies | 7,027 |
+| Features used | 63 Financial Ratios (Attr37 excluded — high missingness) |
+| Target | Bankruptcy (0 = Survived, 1 = Bankrupt) |
+| Class imbalance | ~96% survived, ~4% bankrupt — handled via `scale_pos_weight` |
 
 The dataset includes financial data from companies **1–5 years before bankruptcy**, enabling multi-year prediction analysis.
 
 ---
 
 ## Machine Learning Pipeline
+
 **Data Preprocessing**
-
-- Missing value handling
-
-- Feature selection
-
-- Consistent preprocessing across datasets
-
----
+- Dropped `Attr37` due to high proportion of missing values
+- Remaining missing values filled with column medians
+- Class imbalance handled via `scale_pos_weight` in XGBoost
 
 **Model Training**
 
-Three machine learning models were evaluated:
+Three models were evaluated:
 
-- Logistic Regression
+| Model | ROC-AUC |
+|---|---|
+| Logistic Regression | ~0.83 |
+| Random Forest | ~0.93 |
+| **XGBoost** | **0.97** ✅ |
 
-- Random Forest
+XGBoost was selected for deployment.
 
-- XGBoost
+**Median Imputation (deployment)**
 
-XGBoost produced the best results and was selected for deployment.
+For partial inputs in the app (Quick mode), unset features are imputed with their **training-set median** rather than 0. Defaulting to 0 would falsely signal distress (e.g. zero profit margin, zero equity) for features the user simply left blank.
 
 ---
 
 ## Model Performance
-**Test Performance (1-Year Prediction)**
+
+**1-Year Prediction (Test Set)**
+
 | Metric | Score |
-|--------|----------|
+|---|---|
 | ROC-AUC | 0.97 |
 | Accuracy | 0.99 |
 
 ---
-## Multi Year Bankruptcy Forecasting
-The model was also evaluated on financial data from **2–5 years before bankruptcy.**
 
-| Prediction Horizon |	ROC-AUC |
-|---------------------|----------|
-| 1 Year | 0.97 |
-| 2 Years	| 0.88 |
-| 3 Years	| 0.85 |
-| 4 Years	| 0.87 |
-| 5 Years	| 0.89 |
+## Multi-Year Bankruptcy Forecasting
 
-This shows that financial distress signals can be detected **several years before bankruptcy occurs.**
+The model was validated on financial data from **2–5 years before bankruptcy.**
+
+| Prediction Horizon | ROC-AUC |
+|---|---|
+| 1 Year before bankruptcy | 0.97 |
+| 2 Years before bankruptcy | 0.88 |
+| 3 Years before bankruptcy | 0.85 |
+| 4 Years before bankruptcy | 0.87 |
+| 5 Years before bankruptcy | 0.89 |
+
+Financial distress can be detected **up to 5 years before bankruptcy occurs.**
 
 ---
 
-## Important Financial Indicators
+## Top Predictive Financial Ratios
 
-Top financial ratios identified by the model:
+The model's most important features (by XGBoost feature importance):
 
-- Attr24
-- Attr27
-- Attr13
-- Attr26
-- Attr23
-- Attr14
-- Attr34
-- Attr22
-- Attr16
-- Attr21
+| Rank | Feature | Financial Ratio |
+|---|---|---|
+| 1 | Attr24 | 3-Year Gross Profit / Total Assets |
+| 2 | Attr27 | Operating Profit / Financial Expenses (Interest Cover) |
+| 3 | Attr13 | (Gross Profit + Depreciation) / Sales |
+| 4 | Attr26 | (Net Profit + Depreciation) / Total Liabilities |
+| 5 | Attr23 | Net Profit Margin (Net Profit / Sales) |
+| 6 | Attr14 | (Gross Profit + Interest) / Total Assets |
+| 7 | Attr34 | Operating Expenses / Total Liabilities |
+| 8 | Attr22 | Operating Profit / Total Assets |
+| 9 | Attr16 | (Gross Profit + Depreciation) / Total Liabilities |
+| 10 | Attr21 | Sales Growth (YoY) |
 
-These ratios correspond to indicators related to:
-
-- profitability
-- leverage
-- liquidity
-
-These factors are widely used in traditional financial risk models such as **Altman Z-Score.**
+These ratios relate to **profitability, leverage, and liquidity** — the same dimensions used in the classic Altman Z-Score.
 
 ---
 
 ## Application Features
 
-The deployed web application provides:
-
-- bankruptcy probability prediction
-- risk score (0–100)
-- risk category classification
-- interactive financial ratio inputs
-- financial risk dashboard interface
+- **Quick mode** — enter only the top 10 key ratios (unset features imputed with training medians)
+- **Full mode** — all 63 ratios organized into 4 tabs: Profitability, Liquidity, Leverage, Efficiency
+- **Gauge chart** — visual risk score with color-coded zones (green / amber / red)
+- **Risk category** — Low / Medium / High with contextual advice
+- **Multi-year accuracy chart** — shows model ROC-AUC across 1–5 year forecast horizons
+- **Tooltips** — every ratio has a plain-English explanation
 
 Risk categories:
 
-| Score	| Risk Level |
-|-------|------------|
-| 0–30	| Low Risk |
-| 30–60	| Medium Risk |
-| 60–100 | High Risk |
+| Score | Risk Level |
+|---|---|
+| 0–30 | 🟢 Low Risk |
+| 30–60 | 🟠 Medium Risk |
+| 60–100 | 🔴 High Risk |
 
 ---
 
 ## Tech Stack
 
-Programming Language
-
-Python
-
-- Libraries
-- Pandas
-- NumPy
-- Scikit-learn
-- XGBoost
-- SHAP
-- Streamlit
-
-Deployment
-
-Streamlit Cloud
-
----
-## How to run Locally
-
-Clone the repository
-
-git clone 
-  - **https://github.com/Azim521/AI-Bankruptcy-Risk-Analyzer.git**
-
-Install dependencies
-
-  - pip install -r requirements.txt
-
-Run the application
-
-  - streamlit run app.py
+| Layer | Tools |
+|---|---|
+| Language | Python 3 |
+| ML | XGBoost, Scikit-learn |
+| Explainability | SHAP |
+| App | Streamlit |
+| Visualisation | Plotly |
+| Data | Pandas, NumPy |
+| Deployment | Streamlit Cloud |
 
 ---
 
-## Future Improvements
+## Model Files
 
-Possible extensions for this project:
-
-- upload financial statements (CSV)
-- automated ratio calculation
-- SHAP explainability dashboard
-- integration with financial APIs
+```
+model/
+├── bankruptcy_xgb_model.pkl   # Trained XGBoost model
+├── bankruptcy_features.pkl    # Ordered list of 63 feature names
+└── feature_medians.pkl        # Training-set medians for imputation
+```
 
 ---
 
-Author
+## How to Run Locally
 
-Azim Sadath
+```bash
+git clone https://github.com/Azim521/AI-Bankruptcy-Risk-Analyzer.git
+cd AI-Bankruptcy-Risk-Analyzer
+pip install -r requirements.txt
+streamlit run app.py
+```
 
-Aspiring Data Scientist focused on **financial analytics and machine learning systems.**
+---
+
+## Sample Test Values (Quick Mode)
+
+To try the app without real company data, these values represent a **financially distressed** company:
+
+| Ratio | Value |
+|---|---|
+| 3-Year Gross Profit / Total Assets (Attr24) | -0.05 |
+| Interest Cover — Op. Profit / Fin. Expenses (Attr27) | 0.3 |
+| (Gross Profit + Depreciation) / Sales (Attr13) | 0.02 |
+| (Net Profit + Depreciation) / Total Liabilities (Attr26) | -0.02 |
+| Net Profit Margin (Attr23) | -0.08 |
+
+And a **healthy** company:
+
+| Ratio | Value |
+|---|---|
+| 3-Year Gross Profit / Total Assets (Attr24) | 0.12 |
+| Interest Cover — Op. Profit / Fin. Expenses (Attr27) | 4.5 |
+| (Gross Profit + Depreciation) / Sales (Attr13) | 0.18 |
+| (Net Profit + Depreciation) / Total Liabilities (Attr26) | 0.15 |
+| Net Profit Margin (Attr23) | 0.09 |
+
+---
+
+## Author
+
+**Azim Sadath**
+Aspiring Data Scientist focused on financial analytics and machine learning systems.
