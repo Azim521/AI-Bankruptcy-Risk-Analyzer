@@ -17,7 +17,7 @@
 
 ## 📸 App Preview
 
-![Dashboard](Dashboard.png)
+![Screenshot](screenshot.png)
 
 ---
 
