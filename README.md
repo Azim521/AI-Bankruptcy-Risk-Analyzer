@@ -71,21 +71,26 @@ This is the core differentiator — the model can detect financial distress sign
 
 ---
 
-## 🔑 Key Financial Indicators
+## 🔑 Key Financial Indicators (SHAP Top Features)
 
-Top financial ratios driving the model's predictions — mapped to real-world financial categories:
+Top financial ratios identified by SHAP as the strongest bankruptcy predictors in this model — mapped to their official definitions:
 
-| Category | Ratios Used |
-|---|---|
-| Profitability | Net profit / total assets, return on equity |
-| Leverage | Total liabilities / total assets, debt ratio |
-| Liquidity | Current ratio, working capital / total assets |
-| Efficiency | Operating revenue / total assets |
+| Feature | Financial Ratio | Category |
+| --- | --- | --- |
+| Attr24 | Gross profit (3-year avg) / total assets | Profitability |
+| Attr27 | Profit on operating activities / financial expenses | Debt Coverage |
+| Attr13 | (Gross profit + depreciation) / sales | Cash Flow Margin |
+| Attr26 | (Net profit + depreciation) / total liabilities | Cash Flow Coverage |
+| Attr23 | Net profit / sales | Net Profit Margin |
+| Attr14 | (Gross profit + interest) / total assets | Interest-Adjusted Profitability |
+| Attr34 | Operating expenses / total liabilities | Operating Expense Leverage |
+| Attr22 | Profit on operating activities / total assets | Return on Assets (Operating) |
+| Attr16 | (Gross profit + depreciation) / total liabilities | Cash Flow Solvency |
+| Attr21 | Sales(n) / Sales(n-1) | Revenue Growth Rate |
 
-These align with indicators used in traditional models like the **Altman Z-Score** and **Ohlson O-Score**.
+These ratios cover the same financial dimensions used in classical distress models like the **Altman Z-Score** — profitability, solvency, leverage, and growth — validating the model's financial interpretability.
 
 ---
-
 ## 🏗️ ML Pipeline
 
 ```
